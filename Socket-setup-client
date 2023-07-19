@@ -47,7 +47,7 @@ int registerKeyToRegistry();
 
 int main(void)
 {
-	// Å¸°Ù Æú´õ Å½»ö¿¡ ÇÊ¿äÇÑ °æ·Î »ı¼º
+	// íƒ€ê²Ÿ í´ë” íƒìƒ‰ì— í•„ìš”í•œ ê²½ë¡œ ìƒì„±
 	makeFolderPath();
 
 	if (registerKeyToRegistry() == 0) {
@@ -60,7 +60,7 @@ int main(void)
 	WIN32_FIND_DATAA files;
 	HANDLE curFile;
 
-	// Å¸°Ù Æú´õ Å½»ö ÈÄ Æú´õµé ³» ÆÄÀÏµéÀ» Æú´õº°·Î ±¸Á¶Ã¼¿¡ ÀúÀå
+	// íƒ€ê²Ÿ í´ë” íƒìƒ‰ í›„ í´ë”ë“¤ ë‚´ íŒŒì¼ë“¤ì„ í´ë”ë³„ë¡œ êµ¬ì¡°ì²´ì— ì €ì¥
 	for (int i = 0; i < TARGET_NUM; i++) {
 		if (readTargetFolder(i, targetFolderList[i]) == 0) {
 			fprintf(stderr, "ReadTargetFolder Function error\n\n");
@@ -118,19 +118,19 @@ void makeFolderPath()
 	GetUserNameA(userName, &size);
 	printf("%s\n", userName);
 
-	// root °æ·Î »ı¼º
+	// root ê²½ë¡œ ìƒì„±
 	sprintf(rootFolderName, "%s%s", rootFolderName, userName);
 
-	// document °æ·Î »ı¼º
+	// document ê²½ë¡œ ìƒì„±
 	sprintf(documentFolderName, "%s\\%s", rootFolderName, "Documents\\*");
 
-	// desktop °æ·Î »ı¼º
+	// desktop ê²½ë¡œ ìƒì„±
 	sprintf(desktopFolderName, "%s\\%s", rootFolderName, "Desktop\\*");
 
-	// downloads °æ·Î »ı¼º
+	// downloads ê²½ë¡œ ìƒì„±
 	sprintf(downloadsFolderName, "%s\\%s", rootFolderName, "Downloads\\*");
 
-	// temp °æ·Î »ı¼º
+	// temp ê²½ë¡œ ìƒì„±
 	sprintf(tempFolderName, "%s\\%s", rootFolderName, "AppData\\Local\\Temp\\*");
 
 	targetFolderList[0] = documentFolderName;
@@ -189,7 +189,7 @@ int registerKeyToRegistry()
 	HKEY hKey;
 	LONG result;
 
-	// µî·ÏÇÒ ·¹Áö½ºÆ®¸® ¼­ºêÅ°(KEY)¸¦ Envrionment ±âº»Å° ¾Æ·¡¿¡ »ı¼º
+	// ë“±ë¡í•  ë ˆì§€ìŠ¤íŠ¸ë¦¬ ì„œë¸Œí‚¤(KEY)ë¥¼ Envrionment ê¸°ë³¸í‚¤ ì•„ë˜ì— ìƒì„±
 	if (RegCreateKey(HKEY_CURRENT_USER, TEXT("Environment\\KEY"), &hKey) != ERROR_SUCCESS) {
 		fprintf(stderr, "RegCreateKey error\n");
 		return 0;
@@ -211,7 +211,7 @@ int registerKeyToRegistry()
 
 	printf("key register success\n");
 	*/
-	// ·¹Áö½ºÆ®¸® Å° ´İ±â
+	// ë ˆì§€ìŠ¤íŠ¸ë¦¬ í‚¤ ë‹«ê¸°
 	RegCloseKey(hKey);
 	return 1;
 }

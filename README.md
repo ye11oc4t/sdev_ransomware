@@ -78,7 +78,7 @@
 # <실행부>
 **[4. 파일 유형 검사부의 역할]**
 ```
- 1) 파일의 hex를 읽어 헤더/푸터를 비교하여 다른 파일과 txt, png, jpg, doc/docx 파일을 구분
+ 1) 파일의 hex를 읽어 헤더/푸터를 비교하여 다른 파일과 txt, png, jpg, doc/docx , (mp3, mp4, png, jpg, gif, txt, docx, pptx, xlsx, pdf) 파일을 구분
 ```
    
 **[5. 암호화부의 역할]**
