@@ -1,0 +1,16 @@
+﻿  window-setup.c
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(11,39): warning C4133: 'return': 'char [7]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(12,45): warning C4133: 'return': 'char [7]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(13,45): warning C4133: 'return': 'char [7]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(14,44): warning C4133: 'return': 'char [9]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(15,44): warning C4133: 'return': 'char [7]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(16,44): warning C4133: 'return': 'char [9]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(17,44): warning C4133: 'return': 'char [10]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(18,44): warning C4133: 'return': 'char [6]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(19,44): warning C4133: 'return': 'char [6]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(20,44): warning C4133: 'return': 'char [8]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(21,46): warning C4133: 'return': 'char [7]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(22,45): warning C4133: 'return': 'char [7]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(23,2): warning C4133: 'return': 'char [8]'과(와) 'const int *' 사이의 형식이 호환되지 않습니다.
+C:\Users\user\Desktop\c\Ransomeware_project\Ransomeware_project\window-setup.c(34,9): warning C4477: 'printf' : 서식 문자열 '%s'에 'char *' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'const int *'입니다.
+  Ransomeware_project.vcxproj -> C:\Users\user\Desktop\c\Ransomeware_project\x64\Debug\Ransomeware_project.exe
