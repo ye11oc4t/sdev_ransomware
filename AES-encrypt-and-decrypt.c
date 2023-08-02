@@ -2,20 +2,23 @@
 #include <string.h>
 #include <stdint.h>
 
-
-// ������� AES128 ����ϵ��� �����س���
+// 코드 베이스는 tiny-aes 깃허브의 test 코드
+// 헤더에서 AES128 사용하도록 설정해놓음
+// aes.h 파일에서 어떤 AES 모드를 쓸 건지 선택하게 할 수 있는데 CBC128로 설정하게 만든 거임
 #define CBC 1
 #define CTR 1
 #define ECB 1
 
 #include "aes.h"
 
-
+//함수를 일단 선언해놓고 아래에서 구현
 static void phex(uint8_t* str);
 static int test_encrypt_cbc(void);
 static int test_decrypt_cbc(void);
 
-
+//메인 함수는 암호화와 복호화 함수를 호출하는 기능만 함
+//두 함수의 return 값은 없고 exit은 형식 상의 return 변수
+//근데 파일값을 읽어와서 암호화하려면 인자 배열을 argument로 넣는 게 필요할듯
 int main(void)
 {
     int exit;
@@ -27,7 +30,7 @@ int main(void)
 }
 
 
-// prints string as hex
+// 예쁘게 출력하는 함수
 static void phex(uint8_t* str)
 {
     uint8_t len = 16;
@@ -37,29 +40,30 @@ static void phex(uint8_t* str)
     printf("\n");
 }
 
-
+//복호화 코드
 static int test_decrypt_cbc(void)
 {
-    // (���ذ�) key�� ������Ʈ���κ��� �ҷ��ͼ� ���� �־�� ��
+    // (미해결) key를 레지스트리로부터 불러와서 여기 넣어야 함
     uint8_t key[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
 
-    // (���ذ�) �����Ϳ��� 64����Ʈ��ŭ �Ľ��ؼ� �ִ� �͵� �ʿ�
+    // (미해결) 데이터에서 64바이트만큼 파싱해서 넣는 것도 필요
     uint8_t cipher_text[] = { 0x76, 0x49, 0xab, 0xac, 0x81, 0x19, 0xb2, 0x46, 0xce, 0xe9, 0x8e, 0x9b, 0x12, 0xe9, 0x19, 0x7d,
                       0x50, 0x86, 0xcb, 0x9b, 0x50, 0x72, 0x19, 0xee, 0x95, 0xdb, 0x11, 0x3a, 0x91, 0x76, 0x78, 0xb2,
                       0x73, 0xbe, 0xd6, 0xb8, 0xe3, 0xc1, 0x74, 0x3b, 0x71, 0x16, 0xe6, 0x9e, 0x22, 0x22, 0x95, 0x16,
                       0x3f, 0xf1, 0xca, 0xa1, 0x68, 0x1f, 0xac, 0x09, 0x12, 0x0e, 0xca, 0x30, 0x75, 0x86, 0xe1, 0xa7 };
 
-    //iv�� �Ʒ����� ���������� �ʱ�ȭ��
+    //iv는 아래에서 랜덤값으로 초기화됨
     uint8_t iv[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
-    //��(���)�� test �񱳿����� ����
+    //평문(결과)는 test 비교용으로 존재 (없애도 됨)
     uint8_t plain_text[] = { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a,
                       0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c, 0x9e, 0xb7, 0x6f, 0xac, 0x45, 0xaf, 0x8e, 0x51,
                       0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4, 0x11, 0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef,
                       0xf6, 0x9f, 0x24, 0x45, 0xdf, 0x4f, 0x9b, 0x17, 0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10 };
-    //  uint8_t buffer[64];
+    //  AES 암호화 구조체 선언(64바이트)
     struct AES_ctx ctx;
+    //=============여기까지 필요한 배열, 구조체 등 정의===================================
 
-    //��ȣ�� ���
+    //암호문 출력 (굳이출력 안 할 거면 없애도 됨)
     printf("CBC decrypt: \n");
     printf("cipher text:\n");
     for (uint8_t i = (uint8_t)0; i < (uint8_t)4; ++i)
@@ -68,42 +72,47 @@ static int test_decrypt_cbc(void)
     }
     printf("\n");
 
-    //Ű ���
+    //키 출력 (없애도 됨)
     printf("key:\n");
     phex(key);
     printf("\n");
 
-    //��ȣȭ
-    AES_init_ctx_iv(&ctx, key, iv);
-    AES_CBC_decrypt_buffer(&ctx, cipher_text, 64);
+    //복호화
+    AES_init_ctx_iv(&ctx, key, iv); //iv 값을 랜덤하게 셋팅
+    AES_CBC_decrypt_buffer(&ctx, cipher_text, 64); 
+    //64바이트 버퍼 ctx를 사용하여 인자로 들어온 암호문을 복호화
+    //복호화된 내용은 인자로 넣은 cipher_text에 그대로 적용됨
 
-    //�� ���
+    //평문 출력
     printf("plain text:\n");
     for (uint8_t i = (uint8_t)0; i < (uint8_t)4; ++i)
     {
-        phex(cipher_text + i * (uint8_t)16);
+        phex(cipher_text + i * (uint8_t)16); 
     }
     printf("\n");
 }
 
+//암호화 수행 함수수
 static int test_encrypt_cbc(void)
 {
-
+    //암호화 key (마찬가지로 넣어줘야 함)
     uint8_t key[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
-    //��ȣ��(���)�� test �񱳿����� ����
+    
+    //암호문(결과)는 test 비교용으로 존재 (없애도 됨)
     uint8_t cipher_text[] = { 0x76, 0x49, 0xab, 0xac, 0x81, 0x19, 0xb2, 0x46, 0xce, 0xe9, 0x8e, 0x9b, 0x12, 0xe9, 0x19, 0x7d,
                       0x50, 0x86, 0xcb, 0x9b, 0x50, 0x72, 0x19, 0xee, 0x95, 0xdb, 0x11, 0x3a, 0x91, 0x76, 0x78, 0xb2,
                       0x73, 0xbe, 0xd6, 0xb8, 0xe3, 0xc1, 0x74, 0x3b, 0x71, 0x16, 0xe6, 0x9e, 0x22, 0x22, 0x95, 0x16,
                       0x3f, 0xf1, 0xca, 0xa1, 0x68, 0x1f, 0xac, 0x09, 0x12, 0x0e, 0xca, 0x30, 0x75, 0x86, 0xe1, 0xa7 };
-
+    //미리 초기화된 iv 값
     uint8_t iv[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
+    //암호화를 수행할 평문 (마찬가지로 넣어줘야 함)
     uint8_t plain_text[] = { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a,
                       0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c, 0x9e, 0xb7, 0x6f, 0xac, 0x45, 0xaf, 0x8e, 0x51,
                       0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4, 0x11, 0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef,
                       0xf6, 0x9f, 0x24, 0x45, 0xdf, 0x4f, 0x9b, 0x17, 0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10 };
     struct AES_ctx ctx;
-
-    //�� ���
+    //=============여기까지 필요한 배열, 구조체 등 정의===================================
+    //평문 출력 (없애도 됨)
     printf("CBC encrypt: \n");
     printf("plain text:\n");
     for (uint8_t i = (uint8_t)0; i < (uint8_t)4; ++i)
@@ -112,16 +121,18 @@ static int test_encrypt_cbc(void)
     }
     printf("\n");
 
-    //Ű ���
+    //키 출력 (없애도 됨)
     printf("key:\n");
     phex(key);
     printf("\n");
 
-    //��ȣȭ
-    AES_init_ctx_iv(&ctx, key, iv);
+    //암호화
+    AES_init_ctx_iv(&ctx, key, iv); //랜덤한 iv 초기화
     AES_CBC_encrypt_buffer(&ctx, plain_text, 64);
-
-    //��ȣ�� ���
+    //64바이트 버퍼 ctx를 사용하여 인자로 들어온 평문을 암호화
+    //암호화된 내용은 인자로 넣은 plain_text에 그대로 적용됨
+    
+    //암호문 출력
     printf("cipher text:\n");
     for (uint8_t i = (uint8_t)0; i < (uint8_t)4; ++i)
     {
